@@ -9,6 +9,14 @@ from .models import TAdmin, Team, Player, Ongoing, Completed
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import generics, status
+from django.http import HttpResponse
+import csv
+import time
+
+import logging,traceback
+logger = logging.getLogger('django')
+
+localtime = time.asctime( time.localtime(time.time()) )
 
 # Create your views here.
 class TAdminView(viewsets.ModelViewSet):
@@ -38,6 +46,7 @@ class CreateUserView(APIView):
             #print(name,no_players,no_teams,mail,password)
             user = TAdmin(name=name, mail=mail, no_teams=no_teams, no_players=no_players, password=password)
             user.save()
+            logger.info('OrganiserResitered')
                 
             return Response(TAdminSerializer(user).data, status=status.HTTP_201_CREATED)
 
@@ -56,6 +65,7 @@ class CreateTeamView(APIView):
             #print(org_id, name, location)
             team = Team(org_id=org_id, name=name, location=location)
             team.save()
+            logger.info('TeamAdded')
             return Response(TeamSerializer(team).data, status=status.HTTP_201_CREATED)
 
         return Response({'Bad Request': 'Invalid data...'}, status=status.HTTP_400_BAD_REQUEST)
@@ -73,6 +83,7 @@ class CreatePlayerView(APIView):
             #print(org_id, name, skill)
             player = Player(org_id=org_id, name=name, skill=skill)
             player.save()
+            logger.info('PlayerAdded')
             return Response(PlayerSerializer(player).data, status=status.HTTP_201_CREATED)
 
         return Response({'Bad Request': 'Invalid data...'}, status=status.HTTP_400_BAD_REQUEST)
@@ -133,6 +144,7 @@ class CreateCompletedView(APIView):
             price = serializer.data.get('price')
             player = Completed(org_id=org_id, player_id=player_id, name=name, skill=skill, team_id=team_id, team_name=team_name, price=price)
             player.save()
+            logger.info('PlayerBidComplete')
             return Response(CompletedSerializer(player).data, status=status.HTTP_201_CREATED)
 
         return Response({'Bad Request': 'Invalid data...'}, status=status.HTTP_400_BAD_REQUEST)
@@ -170,6 +182,8 @@ class CreateOngoingView(APIView):
             price = serializer.data.get('price')
             player = Ongoing(org_id=org_id, player_id=player_id, name=name, skill=skill, team_id=team_id, team_name=team_name, price=price)
             player.save()
+            logger.info('TeamBidedForPlayer')
+
             return Response(OngoingSerializer(player).data, status=status.HTTP_201_CREATED)
 
         return Response({'Bad Request': 'Invalid data...'}, status=status.HTTP_400_BAD_REQUEST)
